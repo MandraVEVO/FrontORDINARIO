@@ -1,23 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import { getAll } from './services/Api/httpRequest.js'
-
+import React from 'react'
+import './App.css'
+import DatosPersonalesComponent from './Components/DatosPersonalesComponent';
 
 function App() {
-  const [getAll, setGetAll] = useState([])
-  useEffect(() => 
-  {
-    const getAllDataRequest = async () =>{
-      const getAllData = await getAll()
-      setGetAll(getAllData)
-    }
-    getAllDataRequest()
-  }, [])
+  
   return (
     <>
-       <h1 className="text-cyan-200">Hello world!</h1>
-        
+      <h1 className = "text-center">hola</h1>
+      <DatosPersonalesComponent />
+    
     </>
-  )
+  );
 }
 
 export default App
