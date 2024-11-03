@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = "http://localhost:3000/api/v1/Administrativo";
+const url = "http://localhost:3000/api/v1/Menu";
 
 export const getAll = async () => {
     try {
