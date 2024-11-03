@@ -1,19 +1,50 @@
 import React, { useEffect, useState } from 'react';
 import DatosPersonalesService from '../Api/DatosPersonalesService.js';
+import ClienteService from '../Api/ClienteService.js';
+import AdministrativoService from '../Api/AdministrativoService.js';
+import BaristaService from '../Api/BaristaService.js';
 
 const DatosPersonalesComponent = () => {
     const [datosPersonales, setDatosPersonales] = useState([]);
+    const [ocupaciones, setOcupaciones] = useState({});
     const [search, setSearch] = useState('');
 
     useEffect(() => {
-        DatosPersonalesService.getAll()
-            .then(response => {
-                console.log("Datos obtenidos de la API:", response);  // Muestra la respuesta de la API en la consola
-                setDatosPersonales(response);  // Asegúrate de asignar response aquí
-            })
-            .catch(error => {
+        const fetchDatosPersonales = async () => {
+            try {
+                const datosPersonalesData = await DatosPersonalesService.getAll();
+                setDatosPersonales(datosPersonalesData);
+
+                const ocupacionMap = {};
+                const [clientes, administrativos, baristas] = await Promise.all([
+                    ClienteService.getAll(),
+                    AdministrativoService.getAll(),
+                    BaristaService.getAll(),
+                ]);
+
+                clientes.forEach(cliente => {
+                    if (cliente.DatosPersonaleId) {
+                        ocupacionMap[cliente.DatosPersonaleId] = 'Cliente';
+                    }
+                });
+                administrativos.forEach(administrativo => {
+                    if (administrativo.Empleado && administrativo.Empleado.DatosPersonaleId) {
+                        ocupacionMap[administrativo.Empleado.DatosPersonaleId] = 'Administrativo';
+                    }
+                });
+                baristas.forEach(barista => {
+                    if (barista.Empleado && barista.Empleado.DatosPersonaleId) {
+                        ocupacionMap[barista.Empleado.DatosPersonaleId] = 'Barista';
+                    }
+                });
+
+                setOcupaciones(ocupacionMap);
+            } catch (error) {
                 console.error("Error al obtener datos:", error);
-            });
+            }
+        };
+
+        fetchDatosPersonales();
     }, []);
 
     const filteredDatos = datosPersonales.filter(dato =>
@@ -24,9 +55,9 @@ const DatosPersonalesComponent = () => {
 
     return (
         <div className="min-h-screen bg-gray-800 text-gray-100 p-10">
-            <div className="max-w-5xl mx-auto p-6 bg-gray-900 rounded-lg shadow-lg">
+            <div className="p-8 bg-gray-900 rounded-lg shadow-lg w-full">
                 <h1 className="text-3xl font-bold text-center mb-6">Lista de Datos Personales</h1>
-                <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <div className="relative shadow-md sm:rounded-lg">
                     <div className="pb-4">
                         <label htmlFor="table-search" className="sr-only">Buscar</label>
                         <div className="relative mt-1">
@@ -45,16 +76,17 @@ const DatosPersonalesComponent = () => {
                             />
                         </div>
                     </div>
-                    <table className="w-full text-base text-left text-gray-400">
-                        <thead className="text-sm text-gray-300 uppercase bg-gray-700">
+                    <table className="w-full text-lg text-left text-gray-400">
+                        <thead className="text-base text-gray-300 uppercase bg-gray-700">
                             <tr>
-                                <th scope="col" className="px-6 py-3">Nombre</th>
-                                <th scope="col" className="px-6 py-3">Apellido</th>
-                                <th scope="col" className="px-6 py-3">Correo</th>
-                                <th scope="col" className="px-6 py-3">Género</th>
-                                <th scope="col" className="px-6 py-3">Fecha de Nac.</th>
-                                <th scope="col" className="px-6 py-3">Dirección</th>
-                                <th scope="col" className="px-6 py-3">Teléfono</th>
+                                <th scope="col" className="px-6 py-4">Nombre</th>
+                                <th scope="col" className="px-6 py-4">Apellido</th>
+                                <th scope="col" className="px-6 py-4">Correo</th>
+                                <th scope="col" className="px-6 py-4">Género</th>
+                                <th scope="col" className="px-6 py-4">Fecha de Nac.</th>
+                                <th scope="col" className="px-6 py-4">Dirección</th>
+                                <th scope="col" className="px-6 py-4">Teléfono</th>
+                                <th scope="col" className="px-6 py-4">Ocupación</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,11 +102,12 @@ const DatosPersonalesComponent = () => {
                                         <td className="px-6 py-4">{usuario.fechaNac || "N/A"}</td>
                                         <td className="px-6 py-4">{usuario.direccion || "N/A"}</td>
                                         <td className="px-6 py-4">{usuario.telefono || "N/A"}</td>
+                                        <td className="px-6 py-4">{ocupaciones[usuario.id] || "N/A"}</td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="7" className="text-center py-4">
+                                    <td colSpan="8" className="text-center py-8">
                                         No hay datos disponibles.
                                     </td>
                                 </tr>
