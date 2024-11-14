@@ -36,6 +36,7 @@ const BaristaComponent = () => {
         <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center">
             <div className="w-full max-w-none overflow-x-auto shadow-md sm:rounded-lg bg-white dark:bg-gray-800">
                 <div className="pb-4 px-6 pt-6 bg-white dark:bg-gray-800">
+                    <button class="bg-blue-500 hover:bg-blue-200 text-white font-bold py-2 px-4 rounded-full "> Ingresar Barista</button>
                     <label htmlFor="table-search" className="sr-only">Buscar</label>
                     <div className="relative mt-1">
                         <input 
@@ -53,20 +54,12 @@ const BaristaComponent = () => {
                         <tr>
                             <th className="px-4 py-3">Nombre</th>
                             <th className="px-4 py-3">Apellido</th>
-                            <th className="px-4 py-3">Correo</th>
-                            <th className="px-4 py-3">Género</th>
-                            <th className="px-4 py-3">Fecha de Nacimiento</th>
-                            <th className="px-4 py-3">Teléfono</th>
-                            <th className="px-4 py-3">Dirección</th>
                             <th className="px-4 py-3">Especialidad</th>
                             <th className="px-4 py-3">Cargo</th>
                             <th className="px-4 py-3">Costo por Hora</th>
                             <th className="px-4 py-3">CURP</th>
-                            <th className="px-4 py-3">RFC</th>
                             <th className="px-4 py-3">Cafetería</th>
-                            <th className="px-4 py-3">Ubicación Cafetería</th>
-                            <th className="px-4 py-3">Menú Cafetería</th>
-                            
+                            <th className="px-4 py-3">Ubicación Cafetería</th> 
                             <th className="px-4 py-3">Acciones</th>
                         </tr>
                     </thead>
@@ -75,19 +68,16 @@ const BaristaComponent = () => {
                             <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 <td className="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">{barista.Empleado.DatosPersonale.nombre}</td>
                                 <td className="px-4 py-2">{barista.Empleado.DatosPersonale.apellido}</td>
-                                <td className="px-4 py-2">{barista.Empleado.DatosPersonale.correo}</td>
-                                <td className="px-4 py-2">{barista.Empleado.DatosPersonale.genero}</td>
-                                <td className="px-4 py-2">{barista.Empleado.DatosPersonale.fechaNac}</td>
-                                <td className="px-4 py-2">{barista.Empleado.DatosPersonale.telefono}</td>
-                                <td className="px-4 py-2">{barista.Empleado.DatosPersonale.direccion}</td>
+                                
+                               
                                 <td className="px-4 py-2">{barista.especialidad.join(', ')}</td>
                                 <td className="px-4 py-2">{barista.Empleado.cargoEmpleado}</td>
                                 <td className="px-4 py-2">{barista.Empleado.costoHora}</td>
                                 <td className="px-4 py-2">{barista.Empleado.curp}</td>
-                                <td className="px-4 py-2">{barista.Empleado.rfc}</td>
+                                
                                 <td className="px-4 py-2">{barista.Empleado.Cafeterium.nombre}</td>
                                 <td className="px-4 py-2">{barista.Empleado.Cafeterium.ubicacion}</td>
-                                <td className="px-4 py-2">{barista.Empleado.Cafeterium.MenuId}</td>
+                               
                                 
                                 <td className="px-4 py-2 flex space-x-2">
                                     <button 
