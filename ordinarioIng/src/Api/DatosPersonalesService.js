@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = "http://localhost:3000/api/v1/DatosPersonales";
+const url = "https://cafeteriaing.onrender.com/api/v1/DatosPersonales";
 
 export const getAll = async () => {
     try {
