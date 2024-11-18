@@ -121,16 +121,16 @@ const BaristaComponent = () => {
                                 <td className="px-4 py-2 flex space-x-2">
                                     <button
                                         onClick={() => handleSelectBarista(barista)}
-                                        className="bg-sky-950 text-sky-400 px-4 py-2 rounded-md"
+                                        className="bg-sky-950 text-sky-400 border border-sky-400 border-b-4 font-medium overflow-hidden relative px-4 py-2 rounded-md hover:brightness-150 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 group"
                                     >
                                         Actualizar
                                     </button>
                                     <button
-                                        onClick={() => confirmDelete(barista)}
-                                        className="bg-red-600 text-white px-4 py-2 rounded-md"
-                                    >
-                                        Eliminar
-                                    </button>
+                    onClick={() => confirmDelete(administrativo)}
+                    className="flex justify-center items-center gap-2 w-28 h-12 cursor-pointer rounded-md shadow-2xl text-white font-semibold bg-gradient-to-r from-[#fb7185] via-[#e11d48] to-[#be123c] hover:shadow-xl hover:shadow-red-500 hover:scale-105 duration-300 hover:from-[#be123c] hover:to-[#fb7185]"
+                  >
+                    Eliminar
+                  </button>
                                 </td>
                             </tr>
                         ))}
@@ -152,12 +152,12 @@ const BaristaComponent = () => {
                                 Cancelar
                             </button>
                             <button
-                                onClick={handleDelete}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                                disabled={loading}
-                            >
-                                {loading ? 'Eliminando...' : 'Borrar'}
-                            </button>
+                            onClick={handleDelete}
+                            className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                            disabled={loading}
+                          >
+                            {loading ? 'Eliminando...' : 'Borrar'}
+                          </button>
                         </div>
                     </div>
                 </div>
