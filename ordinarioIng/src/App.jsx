@@ -18,12 +18,12 @@ function App() {
     <Router>
       <NavBar />
       <Routes>
-        <Route path="/" element={<DatosPersonalesComponent />} />
-        <Route path="/clientes" element={<ClienteComponent />} />
+        <Route path="/datos-personales" element={<DatosPersonalesComponent />} />
+        <Route path="/cliente-component" element={<ClienteComponent />} />
         <Route path="/menu" element={<MenuComponent />} />
         <Route path="/cafeterias" element={<CafeteriaComponent />} />
-        <Route path="/baristas" element={<BaristaComponent />} />
-        <Route path="/administrativos" element={<AdministrativoComponent />} />
+        <Route path="/barista-component" element={<BaristaComponent />} />
+        <Route path="/administrativo-component" element={<AdministrativoComponent />} />
         <Route path="/ingreso-barista" element={<IngresoBaristaComponent />} />
         <Route path="/ingreso-administrativo" element={<IngresoAdministrativoComponent />} />
         <Route path="/actualizar-barista/:id" element={<ActualizarBaristaComponent />} />

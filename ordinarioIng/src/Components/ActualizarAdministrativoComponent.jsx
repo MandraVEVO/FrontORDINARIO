@@ -238,7 +238,7 @@ const ActualizarAdministrativo = () => {
           Actualizar Administrativo
         </button>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/administrativo-component')}
           className="w-full px-4 py-2 bg-gradient-to-br from-blue-700 to-teal-500 text-white font-bold rounded hover:bg-gradient-to-br focus:outline-none"
         >
           Cancelar
