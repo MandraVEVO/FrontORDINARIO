@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import DatosPersonalesService from "../Api/DatosPersonalesService";
 import EmpleadoService from "../Api/EmpleadoService";
-import BaristaService from "../Api/BaristaService";
+import AdministrativoService from "../Api/AdministrativoService";
 import CafeteriaService from "../Api/CafeteriaService";
-import { useNavigate } from 'react-router-dom';
 
-const Form = () => {
-  const navigate = useNavigate(); // Hook para redirigir
+const IngresoAdministrativoComponent = () => {
   const [datosPersonales, setDatosPersonales] = useState({
     telefono: "",
     direccion: "",
@@ -25,12 +24,13 @@ const Form = () => {
     CafeteriumId: ""
   });
 
-  const [barista, setBarista] = useState({
-    especialidad: ""
+  const [administrativo, setAdministrativo] = useState({
+    area: "",
+    nivelAcceso: ""
   });
 
   const [cafeterias, setCafeterias] = useState([]);
-  
+  const navigate = useNavigate(); // Hook para redirigir
 
   // Calcular valores mínimos y máximos para la fecha
   const minDate = "1950-01-01";
@@ -48,7 +48,6 @@ const Form = () => {
     fetchCafeterias();
   }, []);
 
-  // Función para limpiar el formulario
   const limpiarFormulario = () => {
     setDatosPersonales({
       telefono: "",
@@ -66,12 +65,12 @@ const Form = () => {
       costoHora: "",
       CafeteriumId: ""
     });
-    setBarista({
-      especialidad: ""
+    setAdministrativo({
+      area: "",
+      nivelAcceso: ""
     });
   };
 
-  // Función para verificar si el usuario ya existe en la API
   const verificarUsuarioExistente = async () => {
     const usuarios = await DatosPersonalesService.getAll();
     return usuarios.some(
@@ -82,7 +81,6 @@ const Form = () => {
     );
   };
 
-  // Función para verificar si el CURP es único
   const verificarCurpUnico = async (curp) => {
     const empleados = await EmpleadoService.getAll();
     return !empleados.some((empleado) => empleado.curp === curp);
@@ -96,45 +94,40 @@ const Form = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Verificar si el usuario ya existe
     const usuarioExiste = await verificarUsuarioExistente();
     if (usuarioExiste) {
       alert("El usuario ya existe. Por favor, ingrese datos diferentes.");
-      limpiarFormulario(); // Limpiar el formulario si el usuario ya existe
+      limpiarFormulario();
       return;
     }
 
-    // Verificar si el CURP es único
     const curpEsUnico = await verificarCurpUnico(empleado.curp);
     if (!curpEsUnico) {
       alert("El CURP ingresado ya existe. Por favor, ingrese un CURP diferente.");
-      limpiarFormulario(); // Limpiar el formulario si el CURP ya existe
+      limpiarFormulario();
       return;
     }
 
     try {
-      // 1. Crear registro en DatosPersonales
       const newDatosPersonales = await DatosPersonalesService.create(datosPersonales);
       const datosPersonalesId = newDatosPersonales.id;
 
-      // 2. Crear registro en Empleado utilizando DatosPersonaleId
       const newEmpleado = await EmpleadoService.create({
         ...empleado,
         DatosPersonaleId: datosPersonalesId
       });
       const empleadoId = newEmpleado.id;
 
-      // 3. Crear registro en Barista utilizando EmpleadoId
-      await BaristaService.create({
-        especialidad: barista.especialidad.split(","),
+      await AdministrativoService.create({
+        departamento: administrativo.departamento,
         EmpleadoId: empleadoId
       });
 
-      alert("Barista creado exitosamente");
-      limpiarFormulario(); // Limpiar el formulario después de una creación exitosa
+      alert("Administrativo creado exitosamente");
+      limpiarFormulario();
     } catch (error) {
-      console.error("Error al crear el barista:", error);
-      alert("Error al crear el barista");
+      console.error("Error al crear el administrativo:", error);
+      alert("Error al crear el administrativo");
     }
   };
 
@@ -148,7 +141,7 @@ const Form = () => {
           <span>INGRESA TU</span>
         </div>
         <div className="text-center text-3xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400">
-          <span>BARISTA</span>
+          <span>ADMINISTRATIVO</span>
         </div>
 
         {/* Campos de DatosPersonales */}
@@ -209,7 +202,6 @@ const Form = () => {
         <input
           type="date"
           name="fechaNac"
-          placeholder="Fecha de Nacimiento"
           value={datosPersonales.fechaNac}
           min={minDate}
           max={maxDate}
@@ -222,7 +214,7 @@ const Form = () => {
         <input
           type="text"
           name="cargoEmpleado"
-          placeholder="Cargo (e.g., Bartender)"
+          placeholder="Cargo"
           value={empleado.cargoEmpleado}
           onChange={(e) => handleInputChange(e, setEmpleado)}
           className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
@@ -271,25 +263,45 @@ const Form = () => {
           ))}
         </select>
 
-        {/* Campo de Barista */}
+        {/* Campo de Administrativo */}
         <input
           type="text"
-          name="especialidad"
-          placeholder="Especialidad (e.g., Cocteleria, Vinos)"
-          value={barista.especialidad}
-          onChange={(e) => handleInputChange(e, setBarista)}
+          name="departamento"
+          placeholder="Departamento"
+          value={administrativo.departamento}
+          onChange={(e) => handleInputChange(e, setAdministrativo)}
+          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
+          required
+        />
+
+        <input
+          type="text"
+          name="area"
+          placeholder="Área"
+          value={administrativo.area}
+          onChange={(e) => handleInputChange(e, setAdministrativo)}
+          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
+          required
+        />
+        <input
+          type="text"
+          name="nivelAcceso"
+          placeholder="Nivel de Acceso"
+          value={administrativo.nivelAcceso}
+          onChange={(e) => handleInputChange(e, setAdministrativo)}
           className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
           required
         />
 
         <button
           type="submit"
-          className="w-full px-4 py-2 bg-gradient-to-br from-blue-700 to-teal-500 text-white font-bold rounded hover:bg-gradient-to-br focus:outline-none"
+          className="w-full px-4 py-2 bg-blue-700 text-white font-bold rounded hover:bg-blue-800"
         >
-          Ingresar Barista
+          Registrar Administrativo
         </button>
         <button
-          onClick={() => navigate('/barista-component')}
+          type="button" // Cambia el tipo a "button" para evitar la validación
+          onClick={() => navigate('/administrativo-component')} // Redirige a la página deseada
           className="w-full px-4 py-2 bg-gradient-to-br from-blue-700 to-teal-500 text-white font-bold rounded hover:bg-gradient-to-br focus:outline-none"
         >
           Regresar
@@ -299,4 +311,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default IngresoAdministrativoComponent;

@@ -41,7 +41,7 @@ export const update = async (id, data) => {
         console.log(response.data);
         return response.data;
     } catch (error) {
-        console.error(`Error updating data with id ${id}:`, error);
+        console.error(`Error fetching data with id ${id}:`, error);
         throw error;
     }
 };
@@ -52,7 +52,7 @@ export const remove = async (id) => {
         console.log(response.data);
         return response.data;
     } catch (error) {
-        console.error(`Error deleting data with id ${id}:`, error);
+        console.error(`Error fetching data with id ${id}:`, error);
         throw error;
     }
 };
