@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import CafeteriaService from '../Api/CafeteriaService'; // Asegúrate de que la ruta sea correcta
-import MenuService from '../Api/MenuService'; // Para obtener los menús
+import CafeteriaService from '../Api/CafeteriaService';
+import MenuService from '../Api/MenuService';
 import { SmileOutlined } from '@ant-design/icons';
 import { Button, Modal, Result } from 'antd';
 
@@ -8,11 +8,11 @@ const CafeteriaComponent = () => {
     const [cafeterias, setCafeterias] = useState([]);
     const [selectedCafeteria, setSelectedCafeteria] = useState(null);
     const [menus, setMenus] = useState([]);
-    const [selectedMenuId, setSelectedMenuId] = useState(null);
     const [newCafeteriaName, setNewCafeteriaName] = useState("");
     const [newCafeteriaLocation, setNewCafeteriaLocation] = useState("");
+    const [selectedMenuId, setSelectedMenuId] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false); // Para determinar si la operación fue exitosa
+    const [isSuccess, setIsSuccess] = useState(false);
 
     useEffect(() => {
         const fetchCafeterias = async () => {
@@ -40,9 +40,6 @@ const CafeteriaComponent = () => {
     const handleCafeteriaClick = (id) => {
         const cafeteria = cafeterias.find(c => c.id === id);
         setSelectedCafeteria(cafeteria);
-        setNewCafeteriaName(cafeteria.nombre);
-        setNewCafeteriaLocation(cafeteria.ubicacion);
-        setSelectedMenuId(cafeteria.MenuId);
     };
 
     const handleAddCafeteria = async () => {
@@ -54,12 +51,15 @@ const CafeteriaComponent = () => {
             };
             await CafeteriaService.create(newCafeteria);
             setCafeterias(await CafeteriaService.getAll());
-            setIsSuccess(true); // Operación exitosa
+            setNewCafeteriaName("");
+            setNewCafeteriaLocation("");
+            setSelectedMenuId(null);
+            setIsSuccess(true);
         } catch (error) {
             console.error("Error adding cafeteria:", error);
-            setIsSuccess(false); // Operación fallida
+            setIsSuccess(false);
         } finally {
-            setModalVisible(true); // Mostrar modal
+            setModalVisible(true);
         }
     };
 
@@ -68,37 +68,47 @@ const CafeteriaComponent = () => {
             try {
                 const updatedCafeteria = {
                     ...selectedCafeteria,
-                    nombre: newCafeteriaName,
-                    ubicacion: newCafeteriaLocation,
+                    nombre: selectedCafeteria.nombre,
+                    ubicacion: selectedCafeteria.ubicacion,
                     MenuId: selectedMenuId,
                 };
                 await CafeteriaService.update(selectedCafeteria.id, updatedCafeteria);
                 setCafeterias(await CafeteriaService.getAll());
-                setSelectedCafeteria(null); // Volver a la lista de cafeterías
-                setIsSuccess(true); // Operación exitosa
+                setSelectedCafeteria(null);
+                setIsSuccess(true);
             } catch (error) {
                 console.error("Error updating cafeteria:", error);
-                setIsSuccess(false); // Operación fallida
+                setIsSuccess(false);
             } finally {
-                setModalVisible(true); // Mostrar modal
+                setModalVisible(true);
             }
         }
     };
 
     const handleDeleteCafeteria = async () => {
-        if (selectedCafeteria) {
-            try {
-                await CafeteriaService.remove(selectedCafeteria.id);
-                setCafeterias(await CafeteriaService.getAll());
-                setSelectedCafeteria(null); // Volver a la lista de cafeterías
-                setIsSuccess(true); // Operación exitosa
-            } catch (error) {
-                console.error("Error deleting cafeteria:", error);
-                setIsSuccess(false); // Operación fallida
-            } finally {
-                setModalVisible(true); // Mostrar modal
-            }
-        }
+        Modal.confirm({
+            title: "¿Estás seguro de que deseas eliminar esta cafetería?",
+            content: "Esta acción no se puede deshacer.",
+            okText: "Eliminar",
+            cancelText: "Cancelar",
+            onOk: async () => {
+                try {
+                    await CafeteriaService.remove(selectedCafeteria.id);
+                    setCafeterias(await CafeteriaService.getAll());
+                    setSelectedCafeteria(null);
+                    setIsSuccess(true);
+                } catch (error) {
+                    console.error("Error deleting cafeteria:", error);
+                    setIsSuccess(false);
+                } finally {
+                    setModalVisible(true);
+                }
+            },
+        });
+    };
+
+    const handleCancelEdit = () => {
+        setSelectedCafeteria(null);
     };
 
     const handleModalClose = () => {
@@ -109,21 +119,22 @@ const CafeteriaComponent = () => {
         <div className="p-4">
             {selectedCafeteria ? (
                 <div>
-                    <h2 className="text-2xl font-bold mb-4">Detalles de la Cafetería {selectedCafeteria.id}</h2>
-                    <p><strong>Nombre:</strong> {selectedCafeteria.nombre}</p>
-                    <p><strong>Ubicación:</strong> {selectedCafeteria.ubicacion}</p>
-                    <p><strong>ID de Menú:</strong> {selectedCafeteria.MenuId}</p>
+                    <h2 className="text-2xl font-bold mb-4">Editar Cafetería</h2>
                     <input
                         type="text"
-                        value={newCafeteriaName}
-                        onChange={(e) => setNewCafeteriaName(e.target.value)}
+                        value={selectedCafeteria.nombre}
+                        onChange={(e) =>
+                            setSelectedCafeteria({ ...selectedCafeteria, nombre: e.target.value })
+                        }
                         placeholder="Nombre de la cafetería"
                         className="border p-2 mb-2 w-full"
                     />
                     <input
                         type="text"
-                        value={newCafeteriaLocation}
-                        onChange={(e) => setNewCafeteriaLocation(e.target.value)}
+                        value={selectedCafeteria.ubicacion}
+                        onChange={(e) =>
+                            setSelectedCafeteria({ ...selectedCafeteria, ubicacion: e.target.value })
+                        }
                         placeholder="Ubicación de la cafetería"
                         className="border p-2 mb-4 w-full"
                     />
@@ -139,7 +150,10 @@ const CafeteriaComponent = () => {
                     </select>
                     <div className="flex gap-4">
                         <button onClick={handleEditCafeteria} className="bg-yellow-500 text-white px-4 py-2 rounded-lg">
-                            Editar Cafetería
+                            Guardar Cambios
+                        </button>
+                        <button onClick={handleCancelEdit} className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                            Cancelar
                         </button>
                         <button onClick={handleDeleteCafeteria} className="bg-red-500 text-white px-4 py-2 rounded-lg">
                             Borrar Cafetería
@@ -194,7 +208,6 @@ const CafeteriaComponent = () => {
                 </>
             )}
 
-            {/* Modal para mostrar el resultado de la operación */}
             <Modal
                 visible={modalVisible}
                 onCancel={handleModalClose}

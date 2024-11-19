@@ -11,6 +11,24 @@ const NavBar = () => {
           </div>
           <div className="flex space-x-4">
           <Link
+              to="/articulo-component"
+              className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Articulos
+            </Link>
+          <Link
+              to="/menu"
+              className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Menu
+            </Link>
+          <Link
+              to="/cafeterias"
+              className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Cafeterias
+            </Link>
+          <Link
               to="/datos-personales"
               className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
             >

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import DatosPersonalesComponent from './Components/DatosPersonalesComponent';
+import ArticuloComponent from './Components/ArticuloComponent';
 import ClienteComponent from './Components/ClienteComponent';
 import MenuComponent from './Components/MenuComponent';
 import CafeteriaComponent from './Components/CafeteriaComponent';
@@ -11,6 +12,7 @@ import IngresoBaristaComponent from './Components/IngresoBaristaComponent';
 import IngresoAdministrativoComponent from './Components/IngresoAdministrativoComponent';
 import ActualizarBaristaComponent from './Components/ActualizarBaristaComponent';
 import ActualizarAdministrativoComponent from './Components/ActualizarAdministrativoComponent';
+
 import NavBar from './Components/Navbar';
 
 function App() {
@@ -20,6 +22,7 @@ function App() {
       <Routes>
         <Route path="/datos-personales" element={<DatosPersonalesComponent />} />
         <Route path="/cliente-component" element={<ClienteComponent />} />
+        <Route path="/articulo-component" element={<ArticuloComponent />} />
         <Route path="/menu" element={<MenuComponent />} />
         <Route path="/cafeterias" element={<CafeteriaComponent />} />
         <Route path="/barista-component" element={<BaristaComponent />} />
