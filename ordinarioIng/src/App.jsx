@@ -10,6 +10,7 @@ import BaristaComponent from './Components/BaristaComponent';
 import AdministrativoComponent from './Components/AdministrativoComponent';
 import IngresoBaristaComponent from './Components/IngresoBaristaComponent';
 import IngresoAdministrativoComponent from './Components/IngresoAdministrativoComponent';
+import IngresoClienteComponent from './Components/IngresoClienteComponent';
 import ActualizarBaristaComponent from './Components/ActualizarBaristaComponent';
 import ActualizarAdministrativoComponent from './Components/ActualizarAdministrativoComponent';
 
@@ -29,6 +30,7 @@ function App() {
         <Route path="/administrativo-component" element={<AdministrativoComponent />} />
         <Route path="/ingreso-barista" element={<IngresoBaristaComponent />} />
         <Route path="/ingreso-administrativo" element={<IngresoAdministrativoComponent />} />
+        <Route path="/ingreso-cliente" element={<IngresoClienteComponent />} />
         <Route path="/actualizar-barista/:id" element={<ActualizarBaristaComponent />} />
         <Route path="/actualizar-administrativo/:id" element={<ActualizarAdministrativoComponent />} />
       </Routes>
