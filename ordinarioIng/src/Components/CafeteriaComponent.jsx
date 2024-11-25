@@ -40,6 +40,7 @@ const CafeteriaComponent = () => {
     const handleCafeteriaClick = (id) => {
         const cafeteria = cafeterias.find(c => c.id === id);
         setSelectedCafeteria(cafeteria);
+        setSelectedMenuId(cafeteria.MenuId); // Establecer el menú para la edición
     };
 
     const handleAddCafeteria = async () => {
@@ -51,9 +52,9 @@ const CafeteriaComponent = () => {
             };
             await CafeteriaService.create(newCafeteria);
             setCafeterias(await CafeteriaService.getAll());
-            setNewCafeteriaName("");
-            setNewCafeteriaLocation("");
-            setSelectedMenuId(null);
+            setNewCafeteriaName(""); // Resetea el nombre
+            setNewCafeteriaLocation(""); // Resetea la ubicación
+            setSelectedMenuId(null); // Resetea el menú seleccionado para evitar que se guarde
             setIsSuccess(true);
         } catch (error) {
             console.error("Error adding cafeteria:", error);
@@ -70,11 +71,12 @@ const CafeteriaComponent = () => {
                     ...selectedCafeteria,
                     nombre: selectedCafeteria.nombre,
                     ubicacion: selectedCafeteria.ubicacion,
-                    MenuId: selectedMenuId,
+                    MenuId: selectedMenuId,  // Mantén el valor seleccionado si es una actualización
                 };
                 await CafeteriaService.update(selectedCafeteria.id, updatedCafeteria);
                 setCafeterias(await CafeteriaService.getAll());
                 setSelectedCafeteria(null);
+                setSelectedMenuId(null); // Resetea el menú seleccionado tras la actualización
                 setIsSuccess(true);
             } catch (error) {
                 console.error("Error updating cafeteria:", error);
@@ -96,6 +98,7 @@ const CafeteriaComponent = () => {
                     await CafeteriaService.remove(selectedCafeteria.id);
                     setCafeterias(await CafeteriaService.getAll());
                     setSelectedCafeteria(null);
+                    setSelectedMenuId(null); // Resetea el menú tras eliminar
                     setIsSuccess(true);
                 } catch (error) {
                     console.error("Error deleting cafeteria:", error);
@@ -109,6 +112,7 @@ const CafeteriaComponent = () => {
 
     const handleCancelEdit = () => {
         setSelectedCafeteria(null);
+        setSelectedMenuId(null); // Resetea el menú seleccionado al cancelar la edición
     };
 
     const handleModalClose = () => {
@@ -139,7 +143,7 @@ const CafeteriaComponent = () => {
                         className="border p-2 mb-4 w-full"
                     />
                     <select
-                        value={selectedMenuId}
+                        value={selectedMenuId || ""}
                         onChange={(e) => setSelectedMenuId(e.target.value)}
                         className="border p-2 mb-4 w-full"
                     >
@@ -179,7 +183,7 @@ const CafeteriaComponent = () => {
                             className="border p-2 w-full"
                         />
                         <select
-                            value={selectedMenuId}
+                            value={selectedMenuId || ""}
                             onChange={(e) => setSelectedMenuId(e.target.value)}
                             className="border p-2 w-full"
                         >

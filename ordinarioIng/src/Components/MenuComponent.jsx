@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import MenuService from '../Api/MenuService.js';
 import ArticuloService from '../Api/ArticuloService.js';
-import { SmileOutlined } from '@ant-design/icons';
-import { Button, Modal, Result, Select } from 'antd';
+import { SmileOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Modal, Result } from 'antd';
+import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
-
-const { Option } = Select;
 
 const Menu = () => {
     const [menus, setMenus] = useState([]);
     const [articulos, setArticulos] = useState([]);
     const [selectedArticulos, setSelectedArticulos] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
-    const [editModalVisible, setEditModalVisible] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [menuToEdit, setMenuToEdit] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [editingMenu, setEditingMenu] = useState(null);
+    const [selectedMenu, setSelectedMenu] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,7 +30,12 @@ const Menu = () => {
         const fetchArticulos = async () => {
             try {
                 const data = await ArticuloService.getAll();
-                setArticulos(data);
+                const formattedArticulos = data.map(articulo => ({
+                    value: articulo.id,
+                    label: articulo.nombre,
+                    color: articulo.color || 'blue',
+                }));
+                setArticulos(formattedArticulos);
             } catch (error) {
                 console.error("Error fetching articles:", error);
             }
@@ -43,8 +48,8 @@ const Menu = () => {
     const handleAddMenu = async () => {
         try {
             const newMenu = {
-                articulos: selectedArticulos.map(articulo => articulo),
-                CafeteriumId: 1
+                articulos: selectedArticulos.map(articulo => articulo.label),
+                CafeteriumId: 1,
             };
             await MenuService.create(newMenu);
             setMenus(await MenuService.getAll());
@@ -61,33 +66,42 @@ const Menu = () => {
     const handleEditMenu = async () => {
         try {
             const updatedMenu = {
-                ...menuToEdit,
-                articulos: selectedArticulos
+                ...editingMenu,
+                articulos: selectedArticulos.map(articulo => articulo.label),
             };
-            await MenuService.update(menuToEdit.id, updatedMenu);
+            await MenuService.update(editingMenu.id, updatedMenu);
             setMenus(await MenuService.getAll());
+            setEditingMenu(null);
+            setSelectedArticulos([]);
             setIsSuccess(true);
         } catch (error) {
-            console.error("Error updating menu:", error);
-            setIsSuccess(false);
+            console.error("Error editing menu:", error);
         } finally {
-            setEditModalVisible(false);
+            setModalVisible(false);
         }
     };
 
-    const handleDeleteMenu = async (id) => {
+    const handleDeleteMenu = async () => {
         try {
-            await MenuService.remove(id);
+            setLoading(true);
+            await MenuService.remove(selectedMenu.id);
             setMenus(await MenuService.getAll());
+            setSelectedMenu(null);
         } catch (error) {
             console.error("Error deleting menu:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const openEditModal = (menu) => {
-        setMenuToEdit(menu);
-        setSelectedArticulos(menu.articulos);
-        setEditModalVisible(true);
+        const preSelected = menu.articulos.map(articulo =>
+            articulos.find(option => option.label === articulo)
+        ).filter(Boolean);
+
+        setEditingMenu(menu);
+        setSelectedArticulos(preSelected);
+        setModalVisible(true);
     };
 
     const handleModalClose = () => {
@@ -95,24 +109,50 @@ const Menu = () => {
         setSelectedArticulos([]);
     };
 
-    const handleEditModalClose = () => {
-        setEditModalVisible(false);
-        setSelectedArticulos([]);
-    };
-
-    const handleSelectChange = (value) => {
-        setSelectedArticulos(value);
+    const customStyles = {
+        control: (base) => ({
+            ...base,
+            borderRadius: '8px',
+            padding: '2px',
+            borderColor: '#d1d5db',
+            boxShadow: 'none',
+            '&:hover': { borderColor: '#a1a1aa' },
+        }),
+        option: (styles, { data, isFocused, isSelected }) => ({
+            ...styles,
+            backgroundColor: isSelected ? data.color : isFocused ? '#f3f4f6' : '#fff',
+            color: isSelected ? '#fff' : '#000',
+            cursor: 'pointer',
+        }),
+        multiValue: (styles, { data }) => ({
+            ...styles,
+            backgroundColor: data.color,
+            color: '#fff',
+            borderRadius: '4px',
+            padding: '4px',
+        }),
+        multiValueLabel: (styles) => ({
+            ...styles,
+            color: '#fff',
+        }),
+        multiValueRemove: (styles) => ({
+            ...styles,
+            color: '#fff',
+            ':hover': {
+                backgroundColor: '#e11d48',
+                color: '#fff',
+            },
+        }),
     };
 
     return (
         <div className="p-4">
             <button
                 className="bg-gray-500 text-white px-4 py-2 rounded-lg mb-4"
-                onClick={() => navigate('/articulo-component')}
+                onClick={() => navigate("/articulo-component")}
             >
                 Artículos
             </button>
-
             <h1 className="text-2xl font-bold mb-4 text-center">Menús</h1>
 
             <div className="flex gap-4 mb-6">
@@ -132,79 +172,71 @@ const Menu = () => {
                     >
                         <h2 className="text-xl font-semibold">Menú {menu.id}</h2>
                         <p className="text-gray-600">Artículos: {menu.articulos.join(", ")}</p>
-                        <div className="flex justify-between mt-4">
+                        <div className="flex gap-2 mt-4">
                             <button
                                 onClick={() => openEditModal(menu)}
-                                className="bg-yellow-500 text-white px-4 py-2 rounded-lg"
+                                className="bg-yellow-500 text-white px-2 py-1 rounded-lg flex items-center gap-1"
                             >
-                                Editar
+                                <EditOutlined /> Editar
                             </button>
                             <button
-                                onClick={() => handleDeleteMenu(menu.id)}
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                                onClick={() => setSelectedMenu(menu)}
+                                className="bg-red-500 text-white px-2 py-1 rounded-lg flex items-center gap-1"
                             >
-                                Eliminar
+                                <DeleteOutlined /> Eliminar
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Modal para crear nuevo menú */}
             <Modal
                 visible={modalVisible}
                 onCancel={handleModalClose}
-                onOk={handleAddMenu}
-                title="Crear Nuevo Menú"
-                okText="Guardar"
+                onOk={editingMenu ? handleEditMenu : handleAddMenu}
+                title={editingMenu ? "Editar Menú" : "Crear Nuevo Menú"}
+                okText={editingMenu ? "Guardar Cambios" : "Guardar"}
                 cancelText="Cancelar"
             >
-                <h3 className="text-lg font-semibold mb-2">Selecciona los artículos para el menú:</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                    {editingMenu ? "Edita los artículos del menú:" : "Selecciona los artículos para el menú:"}
+                </h3>
                 <Select
-                    mode="multiple"
-                    allowClear
-                    showSearch
-                    placeholder="Buscar y seleccionar artículos"
-                    style={{ width: '100%' }}
-                    onChange={handleSelectChange}
+                    isMulti
+                    options={articulos}
                     value={selectedArticulos}
-                >
-                    {articulos.map(articulo => (
-                        <Option key={articulo.id} value={articulo.nombre}>
-                            {articulo.nombre}
-                        </Option>
-                    ))}
-                </Select>
+                    onChange={setSelectedArticulos}
+                    placeholder="Buscar y seleccionar artículos"
+                    styles={customStyles}
+                />
             </Modal>
 
-            {/* Modal para editar menú */}
-            <Modal
-                visible={editModalVisible}
-                onCancel={handleEditModalClose}
-                onOk={handleEditMenu}
-                title={`Editar Menú ${menuToEdit?.id}`}
-                okText="Guardar Cambios"
-                cancelText="Cancelar"
-            >
-                <h3 className="text-lg font-semibold mb-2">Edita los artículos del menú:</h3>
-                <Select
-                    mode="multiple"
-                    allowClear
-                    showSearch
-                    placeholder="Buscar y seleccionar artículos"
-                    style={{ width: '100%' }}
-                    onChange={handleSelectChange}
-                    value={selectedArticulos}
-                >
-                    {articulos.map(articulo => (
-                        <Option key={articulo.id} value={articulo.nombre}>
-                            {articulo.nombre}
-                        </Option>
-                    ))}
-                </Select>
-            </Modal>
+            {selectedMenu && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                    <div className="bg-white rounded-lg p-6 text-center">
+                        <h3 className="text-xl font-bold">¿Estás seguro de borrar el registro?</h3>
+                        <p className="text-gray-600 my-4">
+                            Se eliminará toda la información relacionada con este registro.
+                        </p>
+                        <div className="flex justify-center space-x-4">
+                            <button
+                                onClick={() => setSelectedMenu(null)}
+                                className="px-4 py-2 bg-gray-300 rounded-lg"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleDeleteMenu}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                                disabled={loading}
+                            >
+                                {loading ? 'Eliminando...' : 'Borrar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-            {/* Resultado de operación */}
             <Modal
                 visible={isSuccess}
                 onCancel={() => setIsSuccess(false)}
@@ -213,7 +245,7 @@ const Menu = () => {
             >
                 <Result
                     icon={<SmileOutlined />}
-                    title="¡Operación exitosa!"
+                    title="¡Operación realizada exitosamente!"
                     extra={
                         <Button type="primary" onClick={() => setIsSuccess(false)}>
                             Continuar
