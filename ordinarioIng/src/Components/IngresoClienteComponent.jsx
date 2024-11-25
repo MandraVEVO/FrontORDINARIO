@@ -1,144 +1,157 @@
 import React, { useState } from "react";
+import { message, Form, Input, Select, DatePicker, Button } from "antd";
+import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import DatosPersonalesService from "../Api/DatosPersonalesService";
-import ClienteService from "../Api/ClienteService";
+import ClienteService from "../Api/ClienteService.js";
 
-const IngresoClienteComponent = () => {
-  const navigate = useNavigate(); // Hook para redirigir
+const { Option } = Select;
 
-  const [datosPersonales, setDatosPersonales] = useState({
-    telefono: "",
-    direccion: "",
-    correo: "",
-    genero: "",
-    nombre: "",
-    apellido: "",
-    fechaNac: "",
-  });
+const ClienteForm = () => {
+  const [form] = Form.useForm();
+  const navigate = useNavigate(); // Hook para la navegación
 
-  const [cliente, setCliente] = useState({
-    DatosPersonaleId: null, // Se llenará después de crear datos personales
-  });
+  const handleSubmit = async (values) => {
+    const { nombre, apellido, genero, fechaNacimiento, correo, telefono, direccion } = values;
 
-  const handleInputChange = (e, setStateFunc) => {
-    const { name, value } = e.target;
-    setStateFunc((prevState) => ({ ...prevState, [name]: value }));
-  };
+    // Validar si es mayor de 6 años
+    const edad = moment().diff(fechaNacimiento, "years");
+    if (edad < 6) {
+      message.error("El cliente debe ser mayor de 6 años.");
+      return;
+    }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
     try {
-      // Crear datos personales
-      const datosPersonalesResponse = await DatosPersonalesService.create(datosPersonales);
-      const datosPersonalesId = datosPersonalesResponse.id;
-
-      // Crear cliente
       await ClienteService.create({
-        ...cliente,
-        DatosPersonaleId: datosPersonalesId,
+        nombre,
+        apellido,
+        genero,
+        fechaNacimiento: fechaNacimiento.format("YYYY-MM-DD"),
+        correo,
+        telefono,
+        direccion,
       });
-
-      alert("Cliente creado exitosamente");
-      navigate("/clientes"); // Redirigir a la lista de clientes
+      message.success("Cliente ingresado exitosamente.");
+      form.resetFields(); // Limpiar formulario
+      navigate("/cliente-component"); // Regresar a la lista de clientes
     } catch (error) {
-      console.error("Error al crear el cliente:", error);
-      alert("Error al crear el cliente");
+      console.error("Error al crear cliente:", error);
+      message.error("Hubo un error al ingresar el cliente.");
     }
   };
 
+  const handleCancel = () => {
+    navigate("/cliente-component"); // Redirige a la lista de clientes
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-900 to-teal-900">
-      <form
-        onSubmit={handleSubmit}
-        className="relative p-8 max-w-xs w-full bg-gradient-to-tr from-blue-900 via-blue-800 to-teal-700 border border-white shadow-lg rounded-lg space-y-4 text-white"
+    <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-4 text-center">Registrar Cliente</h2>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        initialValues={{ genero: "M" }} // Valor predeterminado para género
       >
-        <div className="text-center text-lg font-mono font-semibold tracking-wide">
-          <span>INGRESAR DATOS</span>
-        </div>
-        <div className="text-center text-3xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400">
-          <span>CLIENTE</span>
-        </div>
-
-        {/* Campos de DatosPersonales */}
-        <input
-          type="text"
+        {/* Campo de nombre */}
+        <Form.Item
+          label="Nombre"
           name="nombre"
-          placeholder="Nombre"
-          value={datosPersonales.nombre}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="text"
-          name="apellido"
-          placeholder="Apellido"
-          value={datosPersonales.apellido}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="email"
-          name="correo"
-          placeholder="Correo"
-          value={datosPersonales.correo}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="text"
-          name="telefono"
-          placeholder="Teléfono"
-          value={datosPersonales.telefono}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="text"
-          name="direccion"
-          placeholder="Dirección"
-          value={datosPersonales.direccion}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="text"
-          name="genero"
-          placeholder="Género"
-          value={datosPersonales.genero}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="date"
-          name="fechaNac"
-          placeholder="Fecha de Nacimiento"
-          value={datosPersonales.fechaNac}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
+          rules={[
+            { required: true, message: "El nombre es obligatorio." },
+            { min: 2, message: "El nombre debe tener al menos 2 caracteres." },
+          ]}
+        >
+          <Input placeholder="Ingresa el nombre" />
+        </Form.Item>
 
-        <button
-          type="submit"
-          className="w-full px-4 py-2 bg-gradient-to-br from-blue-700 to-teal-500 text-white font-bold rounded hover:bg-gradient-to-br focus:outline-none"
+        {/* Campo de apellido */}
+        <Form.Item
+          label="Apellido"
+          name="apellido"
+          rules={[
+            { required: true, message: "El apellido es obligatorio." },
+            { min: 2, message: "El apellido debe tener al menos 2 caracteres." },
+          ]}
         >
-          Ingresar Cliente
-        </button>
-        <button
-          onClick={() => navigate("/clientes")}
-          className="w-full px-4 py-2 bg-gradient-to-br from-blue-700 to-teal-500 text-white font-bold rounded hover:bg-gradient-to-br focus:outline-none"
+          <Input placeholder="Ingresa el apellido" />
+        </Form.Item>
+
+        {/* Campo de género */}
+        <Form.Item
+          label="Género"
+          name="genero"
+          rules={[{ required: true, message: "El género es obligatorio." }]}
         >
-          Cancelar
-        </button>
-      </form>
+          <Select placeholder="Selecciona género">
+            <Option value="M">M</Option>
+            <Option value="F">F</Option>
+          </Select>
+        </Form.Item>
+
+        {/* Campo de fecha de nacimiento */}
+        <Form.Item
+          label="Fecha de Nacimiento"
+          name="fechaNacimiento"
+          rules={[
+            { required: true, message: "La fecha de nacimiento es obligatoria." },
+          ]}
+        >
+          <DatePicker
+            placeholder="Selecciona la fecha"
+            format="YYYY-MM-DD"
+            disabledDate={(current) =>
+              current && current > moment().subtract(6, "years")
+            } // Deshabilitar fechas para menores de 6 años
+          />
+        </Form.Item>
+
+        {/* Campo de correo electrónico */}
+        <Form.Item
+          label="Correo Electrónico"
+          name="correo"
+          rules={[
+            { required: true, message: "El correo electrónico es obligatorio." },
+            { type: "email", message: "El correo no es válido." },
+          ]}
+        >
+          <Input placeholder="Ingresa el correo electrónico" />
+        </Form.Item>
+
+        {/* Campo de teléfono */}
+        <Form.Item
+          label="Teléfono"
+          name="telefono"
+          rules={[
+            { required: true, message: "El teléfono es obligatorio." },
+            { pattern: /^[0-9]{10}$/, message: "El teléfono debe tener 10 dígitos." },
+          ]}
+        >
+          <Input placeholder="Ingresa el número de teléfono" />
+        </Form.Item>
+
+        {/* Campo de dirección */}
+        <Form.Item
+          label="Dirección"
+          name="direccion"
+          rules={[{ required: true, message: "La dirección es obligatoria." }]}
+        >
+          <Input.TextArea placeholder="Ingresa la dirección completa" rows={3} />
+        </Form.Item>
+
+        {/* Botones para enviar o cancelar */}
+        <Form.Item>
+          <div className="flex gap-4">
+            <Button type="primary" htmlType="submit" className="w-full">
+              Registrar Cliente
+            </Button>
+            <Button type="default" onClick={handleCancel} className="w-full">
+              Cancelar
+            </Button>
+          </div>
+        </Form.Item>
+      </Form>
     </div>
   );
 };
 
-export default IngresoClienteComponent;
+export default ClienteForm;
