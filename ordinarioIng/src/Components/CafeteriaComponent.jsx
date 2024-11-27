@@ -48,10 +48,14 @@ const CafeteriaComponent = () => {
             const newCafeteria = {
                 nombre: newCafeteriaName,
                 ubicacion: newCafeteriaLocation,
+                empleado: [],
                 MenuId: selectedMenuId,
             };
+            console.log("Adding new cafeteria:", newCafeteria);
             await CafeteriaService.create(newCafeteria);
-            setCafeterias(await CafeteriaService.getAll());
+            const updatedCafeterias = await CafeteriaService.getAll();
+            console.log("Updated cafeterias:", updatedCafeterias);
+            setCafeterias(updatedCafeterias);
             setNewCafeteriaName(""); // Resetea el nombre
             setNewCafeteriaLocation(""); // Resetea la ubicación
             setSelectedMenuId(null); // Resetea el menú seleccionado para evitar que se guarde

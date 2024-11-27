@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from "react";
-import DatosPersonalesService from "../Api/DatosPersonalesService";
-import EmpleadoService from "../Api/EmpleadoService";
-import BaristaService from "../Api/BaristaService";
-import CafeteriaService from "../Api/CafeteriaService";
 import { useNavigate, useParams } from "react-router-dom";
+import ClienteService from "../Api/ClienteService"; // Asegúrate de que este archivo está en la ruta correcta
+import DatosPersonalesService from "../Api/DatosPersonalesService";
 
-const ActualizarBarista = () => {
-  const { id } = useParams(); // Obtener el ID del barista desde la URL
+
+
+const ActualizarCliente = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  
-  const [datosPersonales, setDatosPersonales] = useState({});
-  const [empleado, setEmpleado] = useState({});
-  const [barista, setBarista] = useState({});
-  const [cafeterias, setCafeterias] = useState([]);
-  
+  const [cliente, setCliente] = useState({});
+  const [datosPersonales,setDatosPersonales] = useState({});
+
+  // Usamos useEffect para obtener los datos cuando el componente se monta
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obtener datos del barista, empleado y personales
-        const baristaData = await BaristaService.getById(id);
-        const empleadoData = await EmpleadoService.getById(baristaData.EmpleadoId);
-        let datosPersonalesData = await DatosPersonalesService.getById(empleadoData.DatosPersonaleId);
+        const clienteData = await ClienteService.getById(id);
+        let datosPersonalesData = await DatosPersonalesService.getById(clienteData.DatosPersonaleId);
 
         if (datosPersonalesData.fechaNac) {
           datosPersonalesData = {
@@ -29,52 +25,46 @@ const ActualizarBarista = () => {
           };
         }
 
-        // Precargar valores
         setDatosPersonales(datosPersonalesData);
-        setEmpleado(empleadoData);
-        setBarista(baristaData);
+        setCliente(clienteData);
 
-        // Obtener todas las cafeterías para el dropdown
-        const cafeteriasData = await CafeteriaService.getAll();
-        setCafeterias(cafeteriasData);
+    
       } catch (error) {
-        console.error("Error al cargar datos:", error);
+        console.error("Error al cargar los datos del cliente:", error);
+        message.error("Hubo un problema al cargar los datos del cliente.");
       }
     };
 
     fetchData();
-  }, [id]);
+  }, [id]); // Se vuelve a ejecutar cuando el `id` cambia
 
+  // Función para manejar los cambios en los campos del formulario
   const handleInputChange = (e, setStateFunc) => {
     const { name, value } = e.target;
     setStateFunc((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  // Función para manejar la actualización de los datos
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
       // Actualizar datos personales
       await DatosPersonalesService.update(datosPersonales.id, datosPersonales);
 
-      // Actualizar datos del empleado
-      await EmpleadoService.update(empleado.id, {
-        ...empleado,
+      // Actualizar datos del cliente
+      await ClienteService.update(cliente.id, {
+        ...cliente,
         DatosPersonaleId: datosPersonales.id,
       });
 
-      // Actualizar datos del barista
-      await BaristaService.update(barista.id, {
-        ...barista,
-        EmpleadoId: empleado.id,
-      });
-
-      alert("Barista actualizado exitosamente");
-      navigate("/barista-component"); // Redirigir a la página principal o lista
+      alert("Datos actualizados correctamente.");
+      navigate("/cliente-component");
     } catch (error) {
-      console.error("Error al actualizar el barista:", error);
-      alert("Error al actualizar los datos");
+      console.error("Error al actualizar los datos:", error);
+      message.error("Hubo un problema al actualizar los datos.");
     }
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-900 to-teal-900">
@@ -86,7 +76,7 @@ const ActualizarBarista = () => {
           <span>ACTUALIZAR DATOS</span>
         </div>
         <div className="text-center text-3xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400">
-          <span>BARISTA</span>
+          <span>CLIENTE</span>
         </div>
 
         {/* Campos de DatosPersonales */}
@@ -153,78 +143,14 @@ const ActualizarBarista = () => {
           className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
           required
         />
-
-        {/* Campos de Empleado */}
-        <input
-          type="text"
-          name="cargoEmpleado"
-          placeholder="Cargo"
-          value={empleado.cargoEmpleado || ""}
-          onChange={(e) => handleInputChange(e, setEmpleado)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="text"
-          name="curp"
-          placeholder="CURP"
-          value={empleado.curp || ""}
-          onChange={(e) => handleInputChange(e, setEmpleado)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="text"
-          name="rfc"
-          placeholder="RFC"
-          value={empleado.rfc || ""}
-          onChange={(e) => handleInputChange(e, setEmpleado)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="number"
-          name="costoHora"
-          placeholder="Costo por Hora"
-          value={empleado.costoHora || ""}
-          onChange={(e) => handleInputChange(e, setEmpleado)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <select
-          name="CafeteriumId"
-          value={empleado.CafeteriumId || ""}
-          onChange={(e) => handleInputChange(e, setEmpleado)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        >
-          <option value="">Seleccione una Cafetería</option>
-          {cafeterias.map((cafeteria) => (
-            <option key={cafeteria.id} value={cafeteria.id}>
-              {cafeteria.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Campo de Barista */}
-        <input
-          type="text"
-          name="especialidad"
-          placeholder="Especialidad"
-          value={barista.especialidad || ""}
-          onChange={(e) => handleInputChange(e, setBarista)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-
         <button
           type="submit"
           className="w-full px-4 py-2 bg-gradient-to-br from-blue-700 to-teal-500 text-white font-bold rounded hover:bg-gradient-to-br focus:outline-none"
         >
-          Actualizar Barista
+          Actualizar Cliente
         </button>
         <button
-          onClick={() => navigate('/barista-component')}
+          onClick={() => navigate('/cliente-component')}
           className="w-full px-4 py-2 bg-gradient-to-br from-blue-700 to-teal-500 text-white font-bold rounded hover:bg-gradient-to-br focus:outline-none"
         >
           Cancelar
@@ -234,4 +160,5 @@ const ActualizarBarista = () => {
   );
 };
 
-export default ActualizarBarista;
+
+export default ActualizarCliente;
