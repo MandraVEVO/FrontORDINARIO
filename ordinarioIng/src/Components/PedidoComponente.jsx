@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Select } from 'antd';
+import { Select, DatePicker} from 'antd';
+import moment from 'moment';
 
 export default function Pedido() {
   const [articulo, setArticulo] = useState('');
@@ -16,6 +17,9 @@ export default function Pedido() {
   const apiBaseUrl = 'https://cafeteriaing.onrender.com/api/v1/';
 
   const buildApiUrl = (endpoint) => `${apiBaseUrl}${endpoint}`;
+
+  
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -134,11 +138,22 @@ export default function Pedido() {
       const pedidoId = pedidoResult.id;
 
       alert(`Pedido y factura agregados exitosamente. ID del pedido: ${pedidoId}`);
+      setListaArticulos([]);
+      setMontoTotal(0);
+      setArticulo('');
+      setCantidad(1);
+      setOpcionSeleccionada('');
+      setTexto('');
+      setFecha('');
     } catch (error) {
       console.error('Error:', error);
       alert(`Error al agregar el pedido y la factura: ${error.message}`);
     }
+
+    
   };
+
+  
 
   return (
     <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen">
@@ -162,6 +177,7 @@ export default function Pedido() {
       option.children.toLowerCase().includes(input.toLowerCase())
     }
     className="w-full p-3 border rounded-lg"
+    style={{ padding: '8px', borderRadius: '4px', borderColor: '#d9d9d9' }}
   >
     {clientes.map((cliente) => (
       <Select.Option key={cliente.id} value={cliente.DatosPersonale.nombre}>
@@ -197,25 +213,40 @@ export default function Pedido() {
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
               className="w-full p-3 border rounded-lg"
+              min={new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+              max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
             />
           </div>
           <div>
             <label htmlFor="articulos" className="block text-lg font-medium mb-2">
               Selecciona un artículo
             </label>
-            <select
+            <Select
               id="articulos"
+              showSearch
               value={articulo}
-              onChange={(e) => setArticulo(e.target.value)}
+              placeholder="Selecciona un artículo"
+              optionFilterProp="children"
+              onChange={(value) => setArticulo(value)}
+              filterOption={(input, option) => {
+                const children = option.children;
+                if (typeof children === 'string') {
+                  return children.toLowerCase().includes(input.toLowerCase());
+                }
+                if (Array.isArray(children)) {
+                  return children.join(' ').toLowerCase().includes(input.toLowerCase());
+                }
+                return false;
+              }}
               className="w-full p-3 border rounded-lg"
+              style={{ padding: '8px', borderRadius: '4px', borderColor: '#d9d9d9' }}
             >
-              <option value="">--Selecciona un artículo--</option>
-              {data.map(item => (
-                <option key={item.id} value={item.nombre}>
-                  {item.nombre} - ${item.precio}
-                </option>
+              {data.map((articulo) => (
+                <Select.Option key={articulo.id} value={articulo.nombre}>
+                  {articulo.nombre} - ${articulo.precio}
+                </Select.Option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
