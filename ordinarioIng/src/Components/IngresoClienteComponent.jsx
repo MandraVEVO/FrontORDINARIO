@@ -121,14 +121,20 @@ const Form = () => {
           required
         />
         <input
-          type="text"
-          name="telefono"
-          placeholder="Teléfono"
-          value={datosPersonales.telefono}
-          onChange={handleInputChange}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
+  type="text"
+  name="telefono"
+  placeholder="Teléfono"
+  value={datosPersonales.telefono}
+  maxLength="15"
+  onChange={(e) => {
+    const valor = e.target.value;
+    if (/^[0-9+]*$/.test(valor)) { // Permite solo números y el símbolo "+"
+      handleInputChange(e, setDatosPersonales);
+    }
+  }}
+  className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
+  required
+/>
         <input
           type="text"
           name="direccion"

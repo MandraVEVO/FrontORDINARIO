@@ -93,23 +93,34 @@ const Form = () => {
 
         {/* Campos de DatosPersonales */}
         <input
-          type="text"
-          name="nombre"
-          placeholder="Nombre"
-          value={datosPersonales.nombre}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
-        <input
-          type="text"
-          name="apellido"
-          placeholder="Apellido"
-          value={datosPersonales.apellido}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
+  type="text"
+  name="nombre"
+  placeholder="Nombre"
+  value={datosPersonales.nombre}
+  onChange={(e) => {
+    const valor = e.target.value;
+    if (/^[a-zA-Z\s]*$/.test(valor)) { // Permite solo letras y espacios
+      handleInputChange(e, setDatosPersonales);
+    }
+  }}
+  className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
+  required
+/>
+<input
+  type="text"
+  name="apellido"
+  placeholder="Apellido"
+  value={datosPersonales.apellido}
+  onChange={(e) => {
+    const valor = e.target.value;
+    if (/^[a-zA-Z\s]*$/.test(valor)) { // Permite solo letras y espacios
+      handleInputChange(e, setDatosPersonales);
+    }
+  }}
+  className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
+  required
+/>
+
         <input
           type="email"
           name="correo"
@@ -120,14 +131,20 @@ const Form = () => {
           required
         />
         <input
-          type="text"
-          name="telefono"
-          placeholder="Teléfono"
-          value={datosPersonales.telefono}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
+  type="text"
+  name="telefono"
+  placeholder="Teléfono"
+  value={datosPersonales.telefono}
+  onChange={(e) => {
+    const valor = e.target.value;
+    if (/^[0-9+]*$/.test(valor)) { // Permite solo números y el símbolo "+"
+      handleInputChange(e, setDatosPersonales);
+    }
+  }}
+  className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
+  required
+/>
+
         <input
           type="text"
           name="direccion"
@@ -137,15 +154,20 @@ const Form = () => {
           className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
           required
         />
-        <input
-          type="text"
-          name="genero"
-          placeholder="Género"
-          value={datosPersonales.genero}
-          onChange={(e) => handleInputChange(e, setDatosPersonales)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
+        <select
+  name="genero"
+  value={datosPersonales.genero}
+  onChange={(e) => handleInputChange(e, setDatosPersonales)}
+  className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
+  required
+>
+  <option value="" disabled>
+    Seleccione género
+  </option>
+  <option value="M">M</option>
+  <option value="F">F</option>
+</select>
+
         <input
           type="date"
           name="fechaNac"
@@ -166,15 +188,17 @@ const Form = () => {
           className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
           required
         />
-        <input
-          type="text"
-          name="curp"
-          placeholder="CURP"
-          value={empleado.curp}
-          onChange={(e) => handleInputChange(e, setEmpleado)}
-          className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
-          required
-        />
+       <input
+  type="text"
+  name="curp"
+  placeholder="CURP"
+  value={empleado.curp}
+  onChange={(e) => handleInputChange(e, setEmpleado)}
+  className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
+  maxLength="18"
+  required
+/>
+
         <input
           type="text"
           name="rfc"
@@ -182,6 +206,7 @@ const Form = () => {
           value={empleado.rfc}
           onChange={(e) => handleInputChange(e, setEmpleado)}
           className="w-full px-4 py-2 border border-white bg-white text-gray-800 rounded focus:outline-none"
+          maxLength="13"
           required
         />
         <input
